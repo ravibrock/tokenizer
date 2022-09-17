@@ -1,4 +1,4 @@
-#!/Users/ravibrock/opt/anaconda3/bin/python
+#!/usr/bin/env python
 import sys
 from transformers import GPT2TokenizerFast
 tokenizer = GPT2TokenizerFast.from_pretrained("gpt2")
