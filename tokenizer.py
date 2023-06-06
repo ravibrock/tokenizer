@@ -1,31 +1,33 @@
 #!/usr/bin/env python
-import sys
+import argparse
+from os.path import expanduser as exp
 from transformers import GPT2TokenizerFast
-tokenizer = GPT2TokenizerFast.from_pretrained("gpt2")
 
 
 def connect(file):
-    f = open(file, "r")
-    content = f.read().split()
-    f.close()
-    return str(tokenizer(content))
-
-
-def write(text, file):
-    text_file = open(file, "w")
-    text_file.write(text)
-    text_file.close()
+    tokenizer = GPT2TokenizerFast.from_pretrained("gpt2")
+    with open(exp(file), "r") as f:
+        file = f.read().split()
+    return tokenizer(file)
 
 
 def main():
-    if len(sys.argv) >= 2:
-        text = connect(sys.argv[1])
-        if len(sys.argv) == 3:
-            write(text, sys.argv[2])
-        count = text.count(",") - text.count("],")
-        print(f"Number of tokens: {count}\n")
-    elif len(sys.argv) == 1:
-        print("Usage: Tokenizer <path to plaintext file> <path to write tokenized file to> [optional]\n")
+    parser = argparse.ArgumentParser("Count tokens in a file")
+    parser.add_argument("input", help="Text file", type=str, default=None)
+    parser.add_argument("-w", "--write", help="Path to write tokenized file to", type=str, default=None, required=False)
+    args = parser.parse_args()
+    if args.input is None:
+        raise Exception("First argument must be filepath to tokenize.")
+    tokens = connect(args.input)
+
+    count = 0
+    for sublist in tokens["input_ids"]:
+        count += len(sublist)
+    print(f"Number of tokens: {count}")
+
+    if args.write is not None:
+        with open(exp(args.write), "w") as f:
+            f.write(str(tokens))
 
 
 if __name__ == "__main__":
